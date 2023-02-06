@@ -74,10 +74,11 @@ https://user-images.githubusercontent.com/10504064/216891022-610402ea-7788-48ec-
 ## Support for
 
 - Shapes
-  - Rectangle
-  - Circle
-- Text
-  - Marquee
+  - `<Rectangle/>`
+  - `<Circle/>`
+- Text-Rendering
+  - `<Text/>`
+  - `<Marquee/>`
   - Wrap: `word` | `all`
   - Text-Scrolling
   - Fonts: custom pixel-fonts in JSON-format
