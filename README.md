@@ -77,6 +77,7 @@ https://user-images.githubusercontent.com/10504064/216889713-e6280c61-26eb-4a51-
   - Marquee
   - Wrap: `word` | `all`
   - Text-Scrolling
+  - Fonts: custom pixel-fonts in JSON-format
 - BlendModes
 - Opacity
 - Color
