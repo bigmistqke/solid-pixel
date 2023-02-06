@@ -83,3 +83,5 @@ https://user-images.githubusercontent.com/10504064/216889713-e6280c61-26eb-4a51-
 - Color
   - Static values
   - Callback: generate color per pixel
+- Mouse-Events: `onHover` and `onClick`
+- Collision-detection
