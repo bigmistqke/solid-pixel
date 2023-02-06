@@ -73,7 +73,7 @@ https://user-images.githubusercontent.com/10504064/216891022-610402ea-7788-48ec-
 
 ## Support for
 
-- Shapes
+- Shapes-Rendering
   - `<Rectangle/>`
   - `<Circle/>`
 - Text-Rendering
@@ -82,11 +82,13 @@ https://user-images.githubusercontent.com/10504064/216891022-610402ea-7788-48ec-
   - Wrap: `word` | `all`
   - Text-Scrolling
   - Fonts: custom pixel-fonts in JSON-format
-- BlendModes
-- Opacity
-- Color
-  - Static values
-  - Callback: generate color per pixel
+  - Background-Color
+- Color-Rendering
+  - Color
+    - String
+    - Generate color per pixel `(uv: [number, number]) => Color`
+  - BlendModes: `add` `subtract` `lighten` `darken` `difference` `default`
+  - Opacity
 - Mouse-Events: `onHover` and `onClick`
 - Collision-detection
 - Responsive Grid
