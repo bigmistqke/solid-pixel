@@ -1,4 +1,5 @@
 import { defineConfig } from 'tsup-preset-solid'
+const cssModulesPlugin = require('esbuild-css-modules-plugin')
 
 export default defineConfig(
   {
@@ -10,5 +11,6 @@ export default defineConfig(
     // writePackageJson: true,
     dropConsole: true,
     cjs: true,
+    esbuildPlugins: [cssModulesPlugin],
   },
 )
