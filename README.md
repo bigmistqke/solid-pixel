@@ -89,3 +89,4 @@ https://user-images.githubusercontent.com/10504064/216891022-610402ea-7788-48ec-
   - Callback: generate color per pixel
 - Mouse-Events: `onHover` and `onClick`
 - Collision-detection
+- Responsive Grid
