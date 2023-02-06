@@ -49,7 +49,7 @@ A Pixel Renderer
 
 https://user-images.githubusercontent.com/10504064/216889302-f2fd0b73-5f5d-4dab-b07a-7b37dbb10823.mp4
 
-- scrollable text and click-events
+- scrollable text, click-events and dynamic colors with color-callback
 
 https://user-images.githubusercontent.com/10504064/216889713-e6280c61-26eb-4a51-9abb-31ed64651784.mp4
 
