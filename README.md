@@ -62,6 +62,10 @@ https://user-images.githubusercontent.com/10504064/216891022-610402ea-7788-48ec-
 
 https://user-images.githubusercontent.com/10504064/217265128-0261c8f8-8c58-4734-84b7-2c6f68fb4ff4.mp4
 
+- text-shadow and convolution
+
+https://user-images.githubusercontent.com/10504064/217322967-987a9c12-c7e5-485e-94f7-45e84ec6cbf6.mp4
+
 ## Components
 
 - `<Display/>`
@@ -76,6 +80,7 @@ https://user-images.githubusercontent.com/10504064/217265128-0261c8f8-8c58-4734-
     - background: `string | (uv: [number, number], current: string) => string`
     - pixelStyle: `JSX.CSSProperties`
     - onClick: `(pixel: Pixel, context: DisplayContextType) => void`
+    - postProcess: `(matrix: Matrix, setMatrix: StoreSetterFunction<Matrix>) => void`
 - `<Rectangle/>`
   - description
     - draws a rectangle
