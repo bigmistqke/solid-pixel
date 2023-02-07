@@ -159,8 +159,7 @@ https://user-images.githubusercontent.com/10504064/217265128-0261c8f8-8c58-4734-
 
 - useDisplay
 
-```
-tsx
+```tsx
 const useDisplay = () => ({
   matrix: Pixel[][]
   setPixel: (position: Vector, props: { color: string } & Partial<General>) => void
