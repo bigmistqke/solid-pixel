@@ -11,7 +11,7 @@
 ## Write JSX
 
 ```tsx
-<>
+<Display>
   <Index each={Array(5).fill('')}>
     {(_, i) => (
       <>
@@ -41,7 +41,7 @@
     blendMode={'difference'}
   />
   <BouncingRectangle dimensions={[20, 20]} blendMode="lighten" color="red" />
-</>
+</Display>
 ```
 
 ## Render Pixels
