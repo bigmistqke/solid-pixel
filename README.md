@@ -58,6 +58,10 @@ https://user-images.githubusercontent.com/10504064/216889713-e6280c61-26eb-4a51-
 
 https://user-images.githubusercontent.com/10504064/216891022-610402ea-7788-48ec-b62d-54220c5d8770.mp4
 
+- particles and feedback
+
+https://user-images.githubusercontent.com/10504064/217265128-0261c8f8-8c58-4734-84b7-2c6f68fb4ff4.mp4
+
 ## Components
 
 - `<Display/>`
