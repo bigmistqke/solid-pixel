@@ -1,9 +1,8 @@
 import { colord } from 'colord'
 import { Color, Vector } from 'src'
+import lerp from './lerp'
 
 export type BlendMode = 'default' | 'difference' | 'add' | 'subtract' | 'lighten' | 'darken'
-
-const lerp = (a: number, b: number, alpha: number) => a * (1 - alpha) + b * alpha
 
 type RGBA = { r: number; g: number; b: number; a: number }
 

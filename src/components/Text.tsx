@@ -1,5 +1,5 @@
 import { colord } from 'colord'
-import { createSignal, mergeProps } from 'solid-js'
+import { createEffect, createSignal, mergeProps } from 'solid-js'
 import font from '../fonts/mono'
 import { Color, General, useDisplay, Vector } from '../index'
 import { blend, BlendMode, getColor } from '../utils/color'
@@ -102,12 +102,17 @@ export default (props: Partial<TextProps>) => {
     props,
   )
 
-  const [position, setPosition] = createSignal(merged.position)
+  const [scroll, setScroll] = createSignal<Vector>([0, 0])
+
+  // createEffect(() => setPosition(merged.position))
 
   const context = useDisplay()
 
   const drawText = () => {
-    let offset = [Math.floor(position()[0]), Math.floor(position()[1])] as Vector
+    let offset = [
+      Math.floor(merged.position[0] + scroll()[0]),
+      Math.floor(merged.position[1]),
+    ] as Vector
 
     let words = merged.text.toString().split(' ')
     if (props.align === 'right') words = words.reverse()
@@ -116,7 +121,7 @@ export default (props: Partial<TextProps>) => {
       if (merged.wrap === 'word') {
         const wordDimensions = getWordDimensions(word, merged.font)
         if (offset[0] + wordDimensions[0] > context.dimensions[0]) {
-          offset = [position()[0], offset[1] + wordDimensions[1] + 1]
+          offset = [merged.position[0], offset[1] + wordDimensions[1] + 1]
         }
       }
       const paddedWord = [...word.split(''), ' ']
@@ -126,10 +131,10 @@ export default (props: Partial<TextProps>) => {
         if (merged.wrap === 'all') {
           const glyphDimensions = getGlyphDimensions(glyph)
           if (offset[0] + glyphDimensions[0] + 1 > context.dimensions[0]) {
-            offset = [position()[0], offset[1] + glyphDimensions[1] + 1]
+            offset = [merged.position[0], offset[1] + glyphDimensions[1] + 1]
           }
         }
-        drawGlyph(glyph, offset, merged, context)
+        drawGlyph(glyph, [offset[0], offset[1] + Math.floor(scroll()[1])], merged, context)
         if (glyph?.[0]) {
           if (props.align === 'right') offset[0] -= glyph[0]?.length + 1
           else offset[0] += glyph[0]?.length + 1
@@ -139,7 +144,7 @@ export default (props: Partial<TextProps>) => {
   }
 
   context.onWheel?.(event => {
-    setPosition(p => [p[0], p[1] + event.deltaY / (10 / 1)])
+    setScroll(p => [p[0], p[1] + event.deltaY / (10 / 1)])
   })
 
   context.onFrame?.(() => {

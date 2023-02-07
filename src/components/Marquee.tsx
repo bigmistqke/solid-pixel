@@ -36,7 +36,7 @@ export default (props: Props) => {
     else setText(t => t.slice(1, t.length) + t[0])
   }
 
-  context?.onFrame(() => {
+  context.onFrame?.(() => {
     const char = props.reverse ? text()[text().length - 1] : text()[0]
     const glyph = char && props.font[char.toUpperCase()]
     const width = glyph && glyph[0]?.length

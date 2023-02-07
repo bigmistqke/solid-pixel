@@ -1,5 +1,17 @@
-import { Component, createEffect, createSignal, Index, onCleanup, Show } from 'solid-js'
-import { Display, Marquee, useDisplay, Text, WrappedText, Rectangle, Circle, Vector } from '../src'
+import { colord } from 'colord'
+import { Component, createEffect, createSignal, For, Index, onCleanup, Show } from 'solid-js'
+import { createStore } from 'solid-js/store'
+import {
+  Circle,
+  createClock,
+  Display,
+  Marquee,
+  Particle,
+  Rectangle,
+  Text,
+  useDisplay,
+  Vector,
+} from '../src'
 import font from '../src/fonts/mono'
 import styles from './App.module.css'
 import BouncingCircle from './BouncingCircle'
@@ -9,22 +21,17 @@ const Example1 = () => {
   const context = useDisplay()
   return (
     <>
-      <Index each={Array(6).fill('')}>
+      <Index each={Array(5).fill('')}>
         {(_, i) => (
           <>
             <Marquee
               text="goodbye world "
               font={font}
-              position={context ? [context?.dimensions[0] - 1, 1 + (i - 1) * 16] : [0, 0]}
+              position={context ? [context?.dimensions[0] - 1, 1 + i * 16] : [0, 0]}
               color={'white'}
               reverse
             />
-            <Marquee
-              text="hello world "
-              font={font}
-              position={[1, 1 + (i - 1) * 16 + 8]}
-              color={'red'}
-            />
+            <Marquee text="hello world " font={font} position={[1, 1 + i * 16 + 8]} color={'red'} />
           </>
         )}
       </Index>
@@ -231,19 +238,12 @@ const Example3 = () => {
   )
 }
 
-const App: Component = () => {
-  const [clock, setClock] = createSignal(0)
-  let last = performance.now()
+const Example4 = () => {
+  const context = useDisplay()
+  const { clock, start } = createClock()
+  start(1000 / 30)
 
-  const tick = () => {
-    setClock(c => c + 1)
-    last = performance.now()
-  }
-
-  const interval = setInterval(() => tick(), 1000 / 30)
-  onCleanup(() => clearInterval(interval))
-
-  const SIZE = 15
+  context.onFrame?.(() => {})
 
   const [width, setWidth] = createSignal(Math.floor(window.innerWidth / SIZE))
   const [height, setHeight] = createSignal(Math.floor(window.innerHeight / SIZE))
@@ -253,29 +253,98 @@ const App: Component = () => {
     setHeight(Math.floor(window.innerHeight / SIZE))
   })
 
+  const [particles, setParticles] = createSignal<{ position: Vector; direction: Vector }[]>([])
+
+  const createObstacles = () =>
+    new Array(20).fill('').map(v => ({
+      size: 10,
+      position: [
+        Math.floor(Math.random() * (width() - 10)),
+        Math.floor(Math.random() * (height() - 10)),
+      ] as Vector,
+    }))
+
+  const [obstacles, setObstacles] = createStore(createObstacles())
+
+  return (
+    <>
+      <Display
+        width={width()}
+        height={height()}
+        clock={clock()}
+        pixelStyle={{
+          margin: '2px',
+          height: SIZE - 4 + 'px',
+          width: SIZE - 4 + 'px',
+          'border-radius': '2px',
+        }}
+        background={(uv, color) => {
+          return colord(color).desaturate(0.1).darken(0.05).toRgbString()
+        }}
+        onClick={(pixel, context) => {
+          const c = context.cursor
+          if (c)
+            setParticles(p => [
+              ...p,
+              { position: c, direction: [Math.random() - 0.5, Math.random() - 0.5] },
+            ])
+        }}
+      >
+        <For each={obstacles}>
+          {(obstacle, index) => (
+            <Rectangle
+              position={[
+                obstacle.position[0] - Math.floor((obstacle.size / 2) * Math.sin(clock() / 10)),
+                obstacle.position[1] - Math.floor((obstacle.size / 2) * Math.cos(clock() / 10)),
+              ]}
+              dimensions={[obstacle.size, obstacle.size]}
+              collision
+              data={index()}
+              color={uv => {
+                const rgb = `rgb(${
+                  (Math.cos((uv[0] + obstacle.size + context.clock) / 10) + 0.5) * 200
+                }, ${
+                  (Math.sin((uv[1] + obstacle.size / 10 + context.clock) / 10) + 0.5) * 200
+                }, 200)`
+                return rgb
+              }}
+            />
+          )}
+        </For>
+        <For each={particles()}>
+          {({ position, direction }) => (
+            <Particle
+              position={position}
+              startDirection={direction}
+              collision
+              onCollision={data => {
+                if (!('delete' in data)) return
+                data.delete('particle')
+                data.forEach(value => {
+                  setObstacles(value, 'size', s => s - 1)
+                  if (obstacles[value]!.size < 0) {
+                    setObstacles([
+                      ...obstacles.slice(0, value),
+                      ...obstacles.slice(value + 1, obstacles.length),
+                    ])
+                  }
+                })
+              }}
+              data="particle"
+            />
+          )}
+        </For>
+      </Display>
+    </>
+  )
+}
+
+const SIZE = 15
+const App: Component = () => {
   return (
     <div class={styles.App}>
       <header class={styles.header}>
-        <Display
-          width={width()}
-          height={height()}
-          clock={clock()}
-          pixelStyle={{
-            margin: '2px',
-            height: SIZE - 4 + 'px',
-            width: SIZE - 4 + 'px',
-            'border-radius': '2px',
-          }}
-          background={uv => {
-            const x = (Math.cos(uv[0] / 10) + 0.5) * 20
-            const y = (Math.sin(uv[1] / 10) + 0.5) * 20
-
-            const rgb = `rgb(${x}, ${y}, 100)`
-            return rgb
-          }}
-        >
-          <Example3 />
-        </Display>
+        <Example4 />
       </header>
     </div>
   )

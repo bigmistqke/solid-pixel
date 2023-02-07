@@ -1,10 +1,10 @@
-import { mergeProps } from 'solid-js'
+import { createSignal, mergeProps } from 'solid-js'
 import { blend, BlendMode } from '../utils/color'
 import { Color, General, useDisplay, Vector } from '../index'
 import { colord } from 'colord'
 
 export type RectangleProps = {
-  position: Vector
+  position: Vector | (() => Vector)
   dimensions: Vector
   color: Color
   opacity: number
@@ -25,7 +25,9 @@ export default (props: Partial<RectangleProps & General>) => {
   const context = useDisplay()
 
   const drawRectangle = () => {
-    const start = merged.position
+    let collisions = new Set<unknown>()
+
+    let start = typeof merged.position === 'function' ? merged.position() : merged.position
     const end = [
       start[0] + (merged.dimensions[0] - 1),
       start[1] + (merged.dimensions[1] - 1),
@@ -44,7 +46,10 @@ export default (props: Partial<RectangleProps & General>) => {
 
         let next =
           typeof merged.color === 'function'
-            ? merged.color([offset[0] - merged.position[0], offset[1] - merged.position[1]])
+            ? merged.color(
+                [offset[0] - start[0], offset[1] - start[1]],
+                context.matrix?.[offset[0] - start[0]]?.[offset[1] - start[1]]?.color || 'black',
+              )
             : merged.color
 
         const current = context?.matrix?.[root[0] + x]?.[root[1] + y]
@@ -52,8 +57,8 @@ export default (props: Partial<RectangleProps & General>) => {
         const position = [root[0] + x, root[1] + y] as Vector
         if (!rgba) return
 
-        if (current?.collision && merged.onCollision) {
-          merged.onCollision(current.data)
+        if (current?.collision && merged.collision) {
+          collisions.add(current.data)
         }
 
         context.setPixel?.(position, {
@@ -65,6 +70,9 @@ export default (props: Partial<RectangleProps & General>) => {
           data: merged.data,
         })
       }
+    }
+    if (merged.onCollision) {
+      merged.onCollision?.(collisions)
     }
   }
 

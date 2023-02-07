@@ -1,3 +1,4 @@
+import { colord } from 'colord'
 import {
   batch,
   Component,
@@ -24,7 +25,7 @@ export type Pixel = {
 } & Partial<General>
 export type Matrix = Pixel[][]
 
-const DisplayContext = createContext<{
+type DisplayContextType = {
   matrix: Matrix
   setPixel?: (position: Vector, props: { color: string } & Partial<General>) => void
   dimensions: Vector
@@ -33,7 +34,9 @@ const DisplayContext = createContext<{
   inBounds?: (pos: Vector) => boolean
   onFrame?: (callback: (clock: number) => void) => void
   onWheel?: (callback: (event: WheelEvent) => void) => void
-}>({
+}
+
+const DisplayContext = createContext<DisplayContextType>({
   clock: 0,
   dimensions: [0, 0],
   matrix: [],
@@ -47,6 +50,7 @@ export const Display: Component<{
   clock: number
   background?: Color
   pixelStyle?: JSX.CSSProperties
+  onClick?: (pixel: Pixel, context: DisplayContextType) => void
 }> = props => {
   const merged = mergeProps({ background: 'black' }, props)
   const [matrix, setMatrix] = createStore<Matrix>([])
@@ -55,7 +59,7 @@ export const Display: Component<{
   const setPixel = (position: Vector, props: { color: string } & Partial<General>) => {
     if (props.pointerEvents === undefined || props.pointerEvents)
       setMatrix(position[0], position[1], { ...props })
-    else setMatrix(position[0], position[1], { color: props.color })
+    else setMatrix(Math.floor(position[0]), Math.floor(position[1]), { color: props.color })
   }
 
   const clearDisplay = (color: Color) => {
@@ -66,7 +70,9 @@ export const Display: Component<{
           .map((_, x) =>
             Array(props.height)
               .fill('')
-              .map((_, y) => ({ color: getColor(color, [x, y]) })),
+              .map((_, y) => ({
+                color: getColor(color, [x, y]),
+              })),
           ),
       ),
     )
@@ -78,10 +84,19 @@ export const Display: Component<{
   // RENDER
   const RenderQueue = new Set<(clock: number) => void>()
   const render = () => {
-    // batch(() => {
-    clearDisplay(merged.background)
-    RenderQueue.forEach(callback => callback(props.clock))
-    // })
+    batch(() => {
+      // clearDisplay(merged.background)
+      console.time('render')
+      clearDisplay(position => {
+        const color = matrix[position[0]]?.[position[1]]?.color
+        if (!color) return 'black'
+        if (typeof merged.background === 'string') return merged.background
+        else return merged.background(position, color)
+      })
+      console.timeEnd('render')
+
+      RenderQueue.forEach(callback => callback(props.clock))
+    })
   }
 
   createEffect(on(() => props.clock, render))
@@ -121,33 +136,42 @@ export const Display: Component<{
 
   const getDimensions = () => [matrix.length, matrix[0]?.length ?? 0] as Vector
 
+  const context = createMemo(
+    (): DisplayContextType => ({
+      get clock() {
+        return props.clock
+      },
+      matrix,
+      setPixel,
+      inBounds,
+      get cursor() {
+        return cursor()
+      },
+      onFrame: callback => {
+        RenderQueue.add(callback)
+        onCleanup(() => RenderQueue.delete(callback))
+      },
+      get dimensions() {
+        return getDimensions()
+      },
+      onWheel: callback => {
+        WheelQueue.add(callback)
+        onCleanup(() => WheelQueue.delete(callback))
+      },
+    }),
+  )
+
+  const onClick = () => {
+    const h = hoveredPixel()
+    if (!h || !props.onClick) return
+    props.onClick?.(h, context())
+  }
+
   return (
-    <DisplayContext.Provider
-      value={{
-        get clock() {
-          return props.clock
-        },
-        matrix,
-        setPixel,
-        inBounds,
-        get cursor() {
-          return cursor()
-        },
-        onFrame: callback => {
-          RenderQueue.add(callback)
-          onCleanup(() => RenderQueue.delete(callback))
-        },
-        get dimensions() {
-          return getDimensions()
-        },
-        onWheel: callback => {
-          WheelQueue.add(callback)
-          onCleanup(() => WheelQueue.delete(callback))
-        },
-      }}
-    >
+    <DisplayContext.Provider value={context()}>
       {props.children}
       <div
+        onClick={onClick}
         onWheel={onWheel}
         onMouseMove={onMouseMove}
         onMouseDown={onMouseDown}
