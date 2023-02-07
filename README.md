@@ -6,10 +6,11 @@
 
 [![pnpm](https://img.shields.io/badge/maintained%20with-pnpm-cc00ff.svg?style=for-the-badge&logo=pnpm)](https://pnpm.io/)
 
-A Pixel Renderer
+■ A Solid Pixel Renderer ■
 
 ## Write JSX
-``` tsx
+
+```tsx
 <>
   <Index each={Array(5).fill('')}>
     {(_, i) => (
@@ -57,25 +58,112 @@ https://user-images.githubusercontent.com/10504064/216889713-e6280c61-26eb-4a51-
 
 https://user-images.githubusercontent.com/10504064/216891022-610402ea-7788-48ec-b62d-54220c5d8770.mp4
 
+## Components
 
-## Support for
+- `<Display/>`
+  - description
+    - root-component
+  - attributes:
+    - background: `string | (uv: [number, number], current: string) => string`
+    - width: `number`
+    - height: `number`
+    - children: `JSXElement`
+    - clock: `number`
+    - background: `string | (uv: [number, number], current: string) => string`
+    - pixelStyle: `JSX.CSSProperties`
+    - onClick: `(pixel: Pixel, context: DisplayContextType) => void`
+- `<Rectangle/>`
+  - description
+    - draws a rectangle
+  - attributes:
+    - position: `[number, number] | (current: [number, number]) => [number, number]`
+    - dimension: `[number, number] | (current: [number, number]) => [number, number]`
+    - color: `string | (uv: [number, number], current: string) => string`
+  - general attributes
+    - opacity: `number`
+    - blendMode: `"default" | "lighten" | "darken" | "add" | "subtract" | "difference"`
+    - pointerEvents: `boolean`
+    - onClick: `(uv: [number, number]) => void`
+    - onHover: `(uv: [number, number]) => void`
+    - collision: `boolean`
+    - data: `any`
+    - onCollision: `(collisions: Set<any>) => void`
+- `<Circle/>`
+  - description
+    - draws a circle
+  - attributes:
+    - position: `[number, number] | (current: [number, number]) => [number, number]`
+    - radius: `number`
+    - color: `string | (uv: [number, number], current: string) => string`
+  - general attributes
+    - opacity: `number`
+    - blendMode: `"default" | "lighten" | "darken" | "add" | "subtract" | "difference"`
+    - pointerEvents: `boolean`
+    - onClick: `(uv: [number, number]) => void`
+    - onHover: `(uv: [number, number]) => void`
+    - collision: `boolean`
+    - data: `any`
+    - onCollision: `(collisions: Set<any>) => void`
+- `<Particle/>`
+  - description
+    - draws a particle
+  - attributes:
+    - position: `[number, number] | (current: [number, number]) => [number, number]`
+    - radius: `number`
+    - color: `string | (uv: [number, number], current: string) => string`
+    - lifespan: `number`
+    - position: `Vector`
+    - startDirection: `Vector | [Vector, Vector]`
+    - endDirection: `Vector | [Vector, Vector]`
+    - startOpacity: `number`
+    - endOpacity: `number`
+  - general attributes
+    - opacity: `number`
+    - blendMode: `"default" | "lighten" | "darken" | "add" | "subtract" | "difference"`
+    - pointerEvents: `boolean`
+    - onClick: `(uv: [number, number]) => void`
+    - onHover: `(uv: [number, number]) => void`
+    - collision: `boolean`
+    - data: `any`
+    - onCollision: `(collisions: Set<any>) => void`
+- `<Text/>`
+  - description
+    - draws text
+  - attributes:
+    - text: `string | number`
+    - font: `Font` 👉 JSON-file containing pixel-font
+    - position: `Vector`
+    - color: `string | (uv: [number, number], current: string) => string`
+    - background?: `string | (uv: [number, number], current: string) => string`
+    - opacity: `number`
+    - blendMode: `BlendMode`
+    - align: `TextAlign`
+    - wrap: `false | 'all' | 'word'`
+    - scroll: `false | 'vertical' | 'horizontal' | 'both'`
+    - scrollSpeed: `number`
+  - general attributes
+    - opacity: `number`
+    - blendMode: `"default" | "lighten" | "darken" | "add" | "subtract" | "difference"`
+    - pointerEvents: `boolean`
+    - onClick: `(uv: [number, number]) => void`
+    - onHover: `(uv: [number, number]) => void`
+    - collision: `boolean`
+    - data: `any`
+    - onCollision: `(collisions: Set<any>) => void`
 
-- Shapes-Rendering
-  - `<Rectangle/>`
-  - `<Circle/>`
-- Text-Rendering
-  - `<Text/>`
-  - `<Marquee/>`
-  - Wrap: `word` | `all`
-  - Text-Scrolling
-  - Fonts: custom pixel-fonts in JSON-format
-  - Background-Color
-- Color-Rendering
-  - Color
-    - String
-    - Generate color per pixel `(uv: [number, number]) => Color`
-  - BlendModes: `add` `subtract` `lighten` `darken` `difference` `default`
-  - Opacity
-- Mouse-Events: `onHover` and `onClick`
-- Collision-detection
-- Responsive Grid
+## Hook
+
+- useDisplay
+
+```tsx
+const useDisplay = () => ({
+  matrix: Matrix
+  setPixel: (position: Vector, props: { color: string } & Partial<General>) => void
+  dimensions: Vector
+  clock: number
+  cursor: Vector
+  inBounds: (pos: Vector) => boolean
+  onFrame: (callback: (clock: number) => void) => void
+  onWheel: (callback: (event: WheelEvent) => void) => void
+})
+```
