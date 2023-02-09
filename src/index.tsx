@@ -1,4 +1,4 @@
-import { extend } from 'colord'
+import { extend, RgbColor } from 'colord'
 import namesPlugin from 'colord/plugins/names'
 import Circle from './components/Circle'
 import { Display, useDisplay } from './components/Display'
@@ -8,7 +8,7 @@ import Rectangle from './components/Rectangle'
 import Text from './components/Text'
 import WrappedText from './components/WrappedText'
 import { BlendMode } from './utils/color'
-import createClock from './utils/createClock'
+import useClock from './utils/useClock'
 
 extend([namesPlugin])
 
@@ -23,4 +23,4 @@ export type General = {
   data: any
 }
 export type { BlendMode }
-export { Text, Rectangle, Marquee, Display, useDisplay, Circle, WrappedText, Particle, createClock }
+export { Text, Rectangle, Marquee, Display, useDisplay, Circle, WrappedText, Particle, useClock }

@@ -1,4 +1,4 @@
-import { colord } from 'colord'
+import { colord, RgbColor } from 'colord'
 import {
   batch,
   Component,
@@ -14,7 +14,7 @@ import {
   onCleanup,
   useContext,
 } from 'solid-js'
-import { createStore, reconcile } from 'solid-js/store'
+import { createStore, reconcile, SetStoreFunction } from 'solid-js/store'
 import { Color, General, Vector } from 'src'
 import { getColor } from '../utils/color'
 
@@ -43,7 +43,7 @@ const DisplayContext = createContext<DisplayContextType>({
 })
 export const useDisplay = () => useContext(DisplayContext)
 
-export const Display: Component<{
+type DisplayProps = {
   width: number
   height: number
   children: JSXElement
@@ -51,7 +51,10 @@ export const Display: Component<{
   background?: Color
   pixelStyle?: JSX.CSSProperties
   onClick?: (pixel: Pixel, context: DisplayContextType) => void
-}> = props => {
+  postProcess?: (matrix: Matrix, setMatrix: SetStoreFunction<Matrix>) => void
+}
+
+export const Display: Component<DisplayProps> = props => {
   const merged = mergeProps({ background: 'black' }, props)
   const [matrix, setMatrix] = createStore<Matrix>([])
   const [cursor, setCursor] = createSignal<Vector>([0, 0])
@@ -62,20 +65,36 @@ export const Display: Component<{
     else setMatrix(Math.floor(position[0]), Math.floor(position[1]), { color: props.color })
   }
 
+  createEffect(() => console.log(matrix.length * (matrix[0]?.length || 0)))
+
   const clearDisplay = (color: Color) => {
-    setMatrix(
-      reconcile(
-        Array(props.width)
-          .fill('')
-          .map((_, x) =>
-            Array(props.height)
-              .fill('')
-              .map((_, y) => ({
-                color: getColor(color, [x, y]),
-              })),
-          ),
-      ),
-    )
+    batch(() => {
+      if (matrix.length === props.width && matrix[0]?.length === props.height) {
+        matrix.forEach((row, x) =>
+          row.forEach((pixel, y) => {
+            setMatrix(x, y, {
+              color: getColor(color, [x, y]),
+              onHover: undefined,
+              onClick: undefined,
+              collision: undefined,
+            })
+          }),
+        )
+      } else {
+        setMatrix(
+          Array(props.width)
+            .fill('')
+            .map((_, x) =>
+              Array(props.height)
+                .fill('')
+                .map((_, y) => ({
+                  color: getColor(color, [x, y]),
+                  // alpha: 0,
+                })),
+            ),
+        )
+      }
+    })
   }
 
   const inBounds = (pos: Vector) =>
@@ -84,20 +103,29 @@ export const Display: Component<{
   // RENDER
   const RenderQueue = new Set<(clock: number) => void>()
   const render = () => {
+    console.time('render')
     batch(() => {
-      // clearDisplay(merged.background)
-      console.time('render')
       clearDisplay(position => {
         const color = matrix[position[0]]?.[position[1]]?.color
         if (!color) return 'black'
         if (typeof merged.background === 'string') return merged.background
         else return merged.background(position, color)
       })
-      console.timeEnd('render')
-
       RenderQueue.forEach(callback => callback(props.clock))
+      if (props.postProcess) props.postProcess(matrix, setMatrix)
     })
+
+    console.timeEnd('render')
   }
+
+  /* clearDisplay(position => {
+     const color = matrix[position[0]]?.[position[1]]?.color
+    if (!color) return { r: 0, g: 0, b: 0 }
+    if ('r' in color && 'g' in color && 'b' in color) return color
+    // if (typeof merged.background === 'string') return merged.background
+    if (typeof merged.background === 'function') return merged.background(position, color)
+    // return { r: 0, g: 0, b: 0 }
+  }) */
 
   createEffect(on(() => props.clock, render))
   render()
@@ -112,6 +140,9 @@ export const Display: Component<{
     if (!x || !y) return
     setCursor([+x, +y])
   }
+
+  createEffect(() => console.log('cursor changed', cursor()[0]))
+
   const onMouseDown = (event: MouseEvent) => {
     hoveredPixel()?.onClick?.()
   }
@@ -121,7 +152,8 @@ export const Display: Component<{
   const hoveredPixel = createMemo<Pixel | undefined>(previous => {
     const pixel = matrix[cursor()[0]]?.[cursor()[1]]
     if (pixel?.onHover !== previous?.onHover) {
-      previous?.onHover?.(false)
+      // if (previous?.onHover) previous?.onHover?.(false)
+      console.log(pixel?.onHover)
       pixel?.onHover?.(true)
     }
     if (pixel?.onClick || pixel?.onHover) {
@@ -201,8 +233,8 @@ export const Display: Component<{
                   <div
                     style={{
                       background: color()?.color,
-                      width: '5px',
-                      height: '5px',
+                      /* width: '5px',
+                      height: '5px', */
                       'pointer-events': 'none',
                       ...props.pixelStyle,
                     }}

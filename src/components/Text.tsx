@@ -21,6 +21,8 @@ export type TextProps = {
   wrap: false | 'all' | 'word'
   scroll: false | 'vertical' | 'horizontal' | 'both'
   scrollSpeed: number
+  shadowPosition: Vector
+  shadowColor: Color
 } & Partial<General>
 
 export const drawGlyph = (
@@ -74,6 +76,42 @@ export const drawGlyph = (
   })
 }
 
+const drawText = (
+  props: Partial<General> & TextProps,
+  scroll: Vector,
+  context: ReturnType<typeof useDisplay>,
+) => {
+  let offset = [Math.floor(props.position[0] + scroll[0]), Math.floor(props.position[1])] as Vector
+
+  let words = props.text.toString().split(' ')
+  if (props.align === 'right') words = words.reverse()
+  words.forEach(word => {
+    if (props.align === 'right') word = word.split('').reverse().join('')
+    if (props.wrap === 'word') {
+      const wordDimensions = getWordDimensions(word, props.font)
+      if (offset[0] + wordDimensions[0] > context.dimensions[0]) {
+        offset = [props.position[0], offset[1] + wordDimensions[1] + 1]
+      }
+    }
+    const paddedWord = [...word.split(''), ' ']
+    paddedWord.forEach(char => {
+      const glyph = props.font[char.toUpperCase()]
+      if (!glyph?.[0]) return
+      if (props.wrap === 'all') {
+        const glyphDimensions = getGlyphDimensions(glyph)
+        if (offset[0] + glyphDimensions[0] + 1 > context.dimensions[0]) {
+          offset = [props.position[0], offset[1] + glyphDimensions[1] + 1]
+        }
+      }
+      drawGlyph(glyph, [offset[0], offset[1] + Math.floor(scroll[1])], props, context)
+      if (glyph?.[0]) {
+        if (props.align === 'right') offset[0] -= glyph[0]?.length + 1
+        else offset[0] += glyph[0]?.length + 1
+      }
+    })
+  })
+}
+
 export const getGlyphDimensions = (glyph: Glyph): Vector => [glyph[0]?.length ?? 0, glyph.length]
 export const getWordDimensions = (word: string, font: Font) => {
   const glyphs = word.split('').map(char => font[char.toUpperCase()])
@@ -88,68 +126,51 @@ export const getWordDimensions = (word: string, font: Font) => {
 }
 
 export default (props: Partial<TextProps>) => {
-  const merged = mergeProps(
-    {
-      text: '',
-      font: font as Font,
-      position: [0, 0] as Vector,
-      align: 'left' as TextAlign,
-      blendMode: 'default' as BlendMode,
-      opacity: 1,
-      color: 'white',
-      scrollSpeed: 1,
-    },
-    props,
-  )
+  const defaults: TextProps = {
+    text: '',
+    font: font as Font,
+    position: [0, 0] as Vector,
+    align: 'left' as TextAlign,
+    blendMode: 'default' as BlendMode,
+    opacity: 1,
+    color: 'white',
+    scrollSpeed: 1,
+    onFrame: () => {},
+    wrap: false as const,
+    scroll: false as const,
+    shadowPosition: [0, 0],
+    shadowColor: 'black',
+  }
+  defaults.shadowColor
+  const merged = mergeProps(defaults, props)
 
   const [scroll, setScroll] = createSignal<Vector>([0, 0])
 
-  // createEffect(() => setPosition(merged.position))
-
   const context = useDisplay()
 
-  const drawText = () => {
-    let offset = [
-      Math.floor(merged.position[0] + scroll()[0]),
-      Math.floor(merged.position[1]),
-    ] as Vector
-
-    let words = merged.text.toString().split(' ')
-    if (props.align === 'right') words = words.reverse()
-    words.forEach(word => {
-      if (merged.align === 'right') word = word.split('').reverse().join('')
-      if (merged.wrap === 'word') {
-        const wordDimensions = getWordDimensions(word, merged.font)
-        if (offset[0] + wordDimensions[0] > context.dimensions[0]) {
-          offset = [merged.position[0], offset[1] + wordDimensions[1] + 1]
-        }
-      }
-      const paddedWord = [...word.split(''), ' ']
-      paddedWord.forEach(char => {
-        const glyph = merged.font[char.toUpperCase()]
-        if (!glyph?.[0]) return
-        if (merged.wrap === 'all') {
-          const glyphDimensions = getGlyphDimensions(glyph)
-          if (offset[0] + glyphDimensions[0] + 1 > context.dimensions[0]) {
-            offset = [merged.position[0], offset[1] + glyphDimensions[1] + 1]
-          }
-        }
-        drawGlyph(glyph, [offset[0], offset[1] + Math.floor(scroll()[1])], merged, context)
-        if (glyph?.[0]) {
-          if (props.align === 'right') offset[0] -= glyph[0]?.length + 1
-          else offset[0] += glyph[0]?.length + 1
-        }
-      })
-    })
-  }
-
   context.onWheel?.(event => {
-    setScroll(p => [p[0], p[1] + event.deltaY / (10 / 1)])
+    if (merged.scroll) setScroll(p => [p[0], p[1] + event.deltaY / (10 / 1)])
   })
+
+  // const shadow = createMemo(() => ())
 
   context.onFrame?.(() => {
     props.onFrame?.()
-    drawText()
+    if (!(merged.shadowPosition[0] === 0 && merged.shadowPosition[1] === 0)) {
+      drawText(
+        {
+          ...merged,
+          color: merged.shadowColor,
+          position: [
+            merged.position[0] + merged.shadowPosition[0],
+            merged.position[1] + merged.shadowPosition[1],
+          ],
+        },
+        scroll(),
+        context,
+      )
+    }
+    drawText(merged, scroll(), context)
   })
   return <></>
 }

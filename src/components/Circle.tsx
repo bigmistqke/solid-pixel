@@ -7,12 +7,19 @@ export type CircleProps = {
   position: Vector
   radius: number
   color: Color
-  opacity: number
-  blendMode: BlendMode
+  opacity?: number
+  blendMode?: BlendMode
 }
 
 export default (props: CircleProps & Partial<General>) => {
-  const merged = mergeProps({ opacity: 1 }, props)
+  const defaults = {
+    opacity: 1,
+    blendMode: 'default',
+    position: [0, 0],
+    radius: 3,
+    color: 'white',
+  } satisfies CircleProps
+  const merged = mergeProps(defaults, props)
   const context = useDisplay()
 
   const distance = (pixel: Vector) =>
@@ -29,24 +36,31 @@ export default (props: CircleProps & Partial<General>) => {
 
         if (!context.inBounds?.(pixel)) continue
         if (distance(pixel) >= merged.radius) continue
+        const current = context.matrix?.[pixel[0]]?.[pixel[1]]
 
         let next =
           typeof merged.color === 'function'
-            ? merged.color([pixel[0] - props.position[0], pixel[1] - props.position[1]])
+            ? merged.color(
+                [pixel[0] - props.position[0], pixel[1] - props.position[1]],
+                current?.color,
+              )
             : merged.color
 
-        if (props.blendMode) {
-          const current = context.matrix?.[pixel[0]]?.[pixel[1]]
-          const rgba = blend(current?.color || 'black', next, merged.opacity, merged.blendMode)
-          // context.setPixel(pixel, 'color', )
-          if (!rgba) return
+        if (merged.blendMode) {
+          const color = blend(
+            current?.color || { r: 0, g: 0, b: 0 },
+            next,
+            merged.opacity,
+            merged.blendMode,
+          )
+          if (!color) return
 
           if (current?.collision && merged.collision) {
             collisions.add(current.data)
           }
 
           context.setPixel?.(pixel, {
-            color: colord(rgba).toRgbString(),
+            color: `rgb(${color.r}, ${color.g}, ${color.b})`,
             onHover: props.onHover,
             onClick: props.onClick,
             collision: props.collision,

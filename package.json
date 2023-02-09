@@ -76,6 +76,7 @@
   ],
   "packageManager": "pnpm@7.22.0",
   "dependencies": {
+    "@solidjs/router": "^0.7.0",
     "color-to-hex": "^1.0.0",
     "colord": "^2.9.3",
     "solid-styled": "^0.7.5"

@@ -1,6 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
+  '@solidjs/router': ^0.7.0
   color-to-hex: ^1.0.0
   colord: ^2.9.3
   concurrently: ^7.6.0
@@ -19,6 +20,7 @@ specifiers:
   vitest: ^0.28.2
 
 dependencies:
+  '@solidjs/router': 0.7.0_solid-js@1.6.9
   color-to-hex: 1.0.0
   colord: 2.9.3
   solid-styled: 0.7.5_3qgza6kmmnz4kp2k2nuuudjnzy
@@ -800,6 +802,14 @@ packages:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.15.0
     dev: true
+
+  /@solidjs/router/0.7.0_solid-js@1.6.9:
+    resolution: {integrity: sha512-8HI84twe5FjYRebSLMAhtkL9bRuTDIlxJK56kjfjU9WKGoUCTaWpCnkuj8Hqde1bWZ0X+GOZxKDfNkn1CjtjxA==}
+    peerDependencies:
+      solid-js: ^1.5.3
+    dependencies:
+      solid-js: 1.6.9
+    dev: false
 
   /@tootallnate/once/2.0.0:
     resolution: {integrity: sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==}

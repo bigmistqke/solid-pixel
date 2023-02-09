@@ -1,4 +1,4 @@
-import { createSignal, mergeProps } from 'solid-js'
+import { createEffect, createSignal, mergeProps, onCleanup } from 'solid-js'
 import { blend, BlendMode } from '../utils/color'
 import { Color, General, useDisplay, Vector } from '../index'
 import { colord } from 'colord'
@@ -9,6 +9,7 @@ export type RectangleProps = {
   color: Color
   opacity: number
   blendMode: BlendMode
+  displacement: Vector | ((uv: Vector) => Vector)
 }
 
 export default (props: Partial<RectangleProps & General>) => {
@@ -19,12 +20,19 @@ export default (props: Partial<RectangleProps & General>) => {
       dimensions: [5, 5] as Vector,
       color: 'white',
       blendMode: 'default' as BlendMode,
+      displacement: [0, 0] as Vector,
     },
     props,
   )
   const context = useDisplay()
 
+  createEffect(() => console.log('color changed', merged.color, props.color))
+
+  onCleanup(() => console.log('cleaned up for some reason'))
+
   const drawRectangle = () => {
+    // console.log('props.color', props.color.r)
+    if (merged.dimensions[0] === 0 && merged.dimensions[1] === 0) return
     let collisions = new Set<unknown>()
 
     let start = typeof merged.position === 'function' ? merged.position() : merged.position
@@ -40,7 +48,12 @@ export default (props: Partial<RectangleProps & General>) => {
 
     for (let x = 0; x < Math.abs(delta[0]) + 1; x++) {
       for (let y = 0; y < Math.abs(delta[1]) + 1; y++) {
-        const offset = [root[0] + x, root[1] + y] as Vector
+        const displacement =
+          typeof merged.displacement === 'function'
+            ? merged.displacement([x, y])
+            : merged.displacement
+
+        const offset = [root[0] + x + displacement[0], root[1] + y + displacement[1]] as Vector
 
         if (!context.inBounds?.(offset)) continue
 
@@ -61,13 +74,17 @@ export default (props: Partial<RectangleProps & General>) => {
           collisions.add(current.data)
         }
 
+        // console.log(`rgba(${rgba.r}, ${rgba.g}, ${rgba.b}, 1)`)
+
         context.setPixel?.(position, {
           color: `rgba(${rgba.r}, ${rgba.g}, ${rgba.b}, 1)`,
+          // color: merged.color,
           onHover: merged.onHover,
           onClick: merged.onClick,
           pointerEvents: merged.pointerEvents,
           collision: merged.collision,
           data: merged.data,
+          // alpha: current.alpha + merged.opacity,
         })
       }
     }
