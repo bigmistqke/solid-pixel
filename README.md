@@ -164,6 +164,21 @@ https://user-images.githubusercontent.com/10504064/217902636-dec116a7-6fe1-4f8c-
     - collision: `boolean`
     - data: `any`
     - onCollision: `(collisions: Set<any>) => void`
+- `<Html/>`
+  - description
+    - integrates HTML into the scene
+  - attributes:
+    - component: JSX.Element
+    - background: `string | (uv: [number, number], current: string) => string`
+  - general attributes
+    - opacity: `number`
+    - blendMode: `"default" | "lighten" | "darken" | "add" | "subtract" | "difference"`
+    - pointerEvents: `boolean`
+    - onClick: `(uv: [number, number]) => void`
+    - onHover: `(uv: [number, number]) => void`
+    - collision: `boolean`
+    - data: `any`
+    - onCollision: `(collisions: Set<any>) => void`
 
 ## Hook
 
