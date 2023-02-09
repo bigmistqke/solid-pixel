@@ -9,7 +9,7 @@ export default (
     position?: Vector
     component: JSX.Element
     background?: Color
-    containerStyle: JSX.CSSProperties
+    style: JSX.CSSProperties
   } & Partial<General>,
 ) => {
   const merged = mergeProps(
@@ -65,7 +65,7 @@ export default (
             width: d()[0] + 'px',
             height: d()[1] + 'px',
             'pointer-events': 'none',
-            ...props.containerStyle,
+            ...props.style,
           }}
         >
           {props.component}

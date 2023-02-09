@@ -49,7 +49,7 @@ const App = () => {
         dimensions={[50, 10]}
       />
       <Html
-        containerStyle={{
+        style={{
           'mix-blend-mode': 'darken',
         }}
         component={
