@@ -68,33 +68,18 @@ export const Display: Component<DisplayProps> = props => {
   }
 
   const clearDisplay = (color: Color) => {
-    batch(() => {
-      if (matrix.length === props.width && matrix[0]?.length === props.height) {
-        matrix.forEach((row, x) =>
-          row.forEach((pixel, y) => {
-            setMatrix(x, y, {
-              color: getColor(color, [x, y]),
-              onHover: undefined,
-              onClick: undefined,
-              collision: undefined,
-            })
-          }),
-        )
-      } else {
-        setMatrix(
-          Array(props.width)
+    setMatrix(
+      Array(props.width)
+        .fill('')
+        .map((_, x) =>
+          Array(props.height)
             .fill('')
-            .map((_, x) =>
-              Array(props.height)
-                .fill('')
-                .map((_, y) => ({
-                  color: getColor(color, [x, y]),
-                  // alpha: 0,
-                })),
-            ),
-        )
-      }
-    })
+            .map((_, y) => ({
+              color: getColor(color, [x, y]),
+              // alpha: 0,
+            })),
+        ),
+    )
   }
 
   const inBounds = (pos: Vector) =>
@@ -105,31 +90,26 @@ export const Display: Component<DisplayProps> = props => {
   const SingleQueue = new Set<(clock: number) => void>()
 
   const render = () => {
-    // console.time('render')
+    console.time('render')
     batch(() => {
+      console.time('display-render')
       clearDisplay(position => {
+        // return 'black'
         const color = matrix[position[0]]?.[position[1]]?.color
         if (!color) return 'black'
         if (typeof merged.background === 'string') return merged.background
         else return merged.background(position, color)
       })
+      console.timeEnd('display-render')
+
       RenderQueue.forEach(callback => callback(props.clock))
       if (props.postProcess) props.postProcess(matrix, setMatrix)
     })
 
     SingleQueue.forEach(callback => callback(props.clock))
     SingleQueue.clear()
-    // console.timeEnd('render')
+    console.timeEnd('render')
   }
-
-  /* clearDisplay(position => {
-     const color = matrix[position[0]]?.[position[1]]?.color
-    if (!color) return { r: 0, g: 0, b: 0 }
-    if ('r' in color && 'g' in color && 'b' in color) return color
-    // if (typeof merged.background === 'string') return merged.background
-    if (typeof merged.background === 'function') return merged.background(position, color)
-    // return { r: 0, g: 0, b: 0 }
-  }) */
 
   createEffect(on(() => props.clock, render))
   render()
