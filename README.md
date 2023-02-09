@@ -66,6 +66,11 @@ https://user-images.githubusercontent.com/10504064/217265128-0261c8f8-8c58-4734-
 
 https://user-images.githubusercontent.com/10504064/217322967-987a9c12-c7e5-485e-94f7-45e84ec6cbf6.mp4
 
+- integrate html 
+
+https://user-images.githubusercontent.com/10504064/217902636-dec116a7-6fe1-4f8c-ac77-de84b8278047.mp4
+
+
 ## Components
 
 - `<Display/>`
@@ -150,6 +155,21 @@ https://user-images.githubusercontent.com/10504064/217322967-987a9c12-c7e5-485e-
     - wrap: `false | 'all' | 'word'`
     - scroll: `false | 'vertical' | 'horizontal' | 'both'`
     - scrollSpeed: `number`
+  - general attributes
+    - opacity: `number`
+    - blendMode: `"default" | "lighten" | "darken" | "add" | "subtract" | "difference"`
+    - pointerEvents: `boolean`
+    - onClick: `(uv: [number, number]) => void`
+    - onHover: `(uv: [number, number]) => void`
+    - collision: `boolean`
+    - data: `any`
+    - onCollision: `(collisions: Set<any>) => void`
+- `<Html/>`
+  - description
+    - integrates HTML into the scene
+  - attributes:
+    - component: JSX.Element
+    - background: `string | (uv: [number, number], current: string) => string`
   - general attributes
     - opacity: `number`
     - blendMode: `"default" | "lighten" | "darken" | "add" | "subtract" | "difference"`
