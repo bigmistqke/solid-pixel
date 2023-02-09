@@ -37,6 +37,7 @@ export const drawGlyph = (
   },
   context: ReturnType<typeof useDisplay>,
 ) => {
+  if (!context.inBounds?.(position)) return
   if (!glyph) return
   if (!context.matrix) return
 
@@ -50,6 +51,7 @@ export const drawGlyph = (
           ? ([position[0] - x, position[1] + y] as Vector)
           : ([position[0] + x, position[1] + y] as Vector)
       if (!context.inBounds?.(offset)) return
+
       const current = context.matrix[offset[0]]?.[offset[1]]
       if (pixel !== ' ') {
         const color = getColor(props.color, offset)
@@ -93,7 +95,9 @@ const drawText = (
         offset = [props.position[0], offset[1] + wordDimensions[1] + 1]
       }
     }
+    if (!context.inBounds?.(offset)) return
     const paddedWord = [...word.split(''), ' ']
+
     paddedWord.forEach(char => {
       const glyph = props.font[char.toUpperCase()]
       if (!glyph?.[0]) return
