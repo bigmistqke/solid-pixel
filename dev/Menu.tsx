@@ -1,15 +1,27 @@
 import { useNavigate } from '@solidjs/router'
 import { createSignal, For } from 'solid-js'
-import { useDisplay, useClock, Display, Rectangle, Text } from '../src'
+import { Display, Text, useClock, useDisplay, Vector } from '../src'
+
+const A = (props: { link: string; position: Vector }) => {
+  const navigate = useNavigate()
+  const [hover, setHover] = createSignal(false)
+
+  return (
+    <Text
+      text={props.link}
+      color={hover() ? 'red' : 'white'}
+      position={props.position}
+      onClick={() => navigate('/' + props.link)}
+      onHover={setHover}
+    />
+  )
+}
 
 export default () => {
   const SIZE = 10
 
-  const context = useDisplay()
-  const { clock, start } = useClock()
-  start(1000 / 30)
-
-  context.onFrame?.(() => {})
+  const { clock, start } = useClock(1000 / 30)
+  start()
 
   const [width, setWidth] = createSignal(Math.floor(window.innerWidth / SIZE))
   const [height, setHeight] = createSignal(Math.floor(window.innerHeight / SIZE))
@@ -19,33 +31,22 @@ export default () => {
     setHeight(Math.floor(window.innerHeight / SIZE))
   })
 
-  const color = () => ({ r: 250, g: 0, b: 0 })
-  const navigate = useNavigate()
-
   return (
-    <>
-      <Display
-        width={width()}
-        height={height()}
-        clock={clock()}
-        pixelStyle={{
-          padding: '2px',
-          height: SIZE + 'px',
-          width: SIZE + 'px',
-        }}
-      >
-        <For each={new Array(6).fill('')}>
-          {(_, index) => (
-            <Text
-              text={+index() + 1}
-              position={[index() * 8, 1]}
-              onClick={() => navigate('/' + (index() + 1))}
-            />
-          )}
-        </For>
-
-        {/* <Rectangle dimensions={[10, 10]} color={'red'} /> */}
-      </Display>
-    </>
+    <Display
+      width={width()}
+      height={height()}
+      clock={clock()}
+      pixelStyle={{
+        padding: '2px',
+        height: SIZE + 'px',
+        width: SIZE + 'px',
+        'border-radius': '50%',
+      }}
+    >
+      <Text text="solid pixel" position={[1, 1]} />
+      <For each={new Array(6).fill('')}>
+        {(_, index) => <A link={(+index() + 1).toString()} position={[index() * 8 + 1, 9]} />}
+      </For>
+    </Display>
   )
 }
