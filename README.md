@@ -170,6 +170,7 @@ https://user-images.githubusercontent.com/10504064/217902636-dec116a7-6fe1-4f8c-
   - attributes:
     - component: JSX.Element
     - background: `string | (uv: [number, number], current: string) => string`
+    - style: JSX.CSSProperties
   - general attributes
     - opacity: `number`
     - blendMode: `"default" | "lighten" | "darken" | "add" | "subtract" | "difference"`
