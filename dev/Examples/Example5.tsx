@@ -1,9 +1,9 @@
 import { colord } from 'colord'
-import BouncingCircle from 'dev/BouncingCircle'
+import BouncingCircle from '../BouncingCircle'
 import { createSignal } from 'solid-js'
 import { createStore, SetStoreFunction } from 'solid-js/store'
 import { useDisplay, useClock, Vector, Display, Text } from '../../src'
-import { Matrix } from 'src/components/Display'
+import { Matrix } from '../../src/components/Display'
 
 export default () => {
   const SIZE = 15

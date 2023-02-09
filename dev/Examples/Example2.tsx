@@ -1,4 +1,4 @@
-import BouncingCircle from 'dev/BouncingCircle'
+import BouncingCircle from '../BouncingCircle'
 import { createSignal } from 'solid-js'
 import { useDisplay, useClock, Display, Text } from '../../src'
 

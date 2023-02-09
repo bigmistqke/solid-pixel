@@ -65,8 +65,6 @@ export const Display: Component<DisplayProps> = props => {
     else setMatrix(Math.floor(position[0]), Math.floor(position[1]), { color: props.color })
   }
 
-  createEffect(() => console.log(matrix.length * (matrix[0]?.length || 0)))
-
   const clearDisplay = (color: Color) => {
     batch(() => {
       if (matrix.length === props.width && matrix[0]?.length === props.height) {
@@ -141,8 +139,6 @@ export const Display: Component<DisplayProps> = props => {
     setCursor([+x, +y])
   }
 
-  createEffect(() => console.log('cursor changed', cursor()[0]))
-
   const onMouseDown = (event: MouseEvent) => {
     hoveredPixel()?.onClick?.()
   }
@@ -153,7 +149,6 @@ export const Display: Component<DisplayProps> = props => {
     const pixel = matrix[cursor()[0]]?.[cursor()[1]]
     if (pixel?.onHover !== previous?.onHover) {
       // if (previous?.onHover) previous?.onHover?.(false)
-      console.log(pixel?.onHover)
       pixel?.onHover?.(true)
     }
     if (pixel?.onClick || pixel?.onHover) {

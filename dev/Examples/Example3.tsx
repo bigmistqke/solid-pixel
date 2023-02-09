@@ -31,7 +31,6 @@ export default () => {
       [position()[0] - direction()[0], position()[1] - direction()[1]] as Vector
 
     context.onFrame?.(() => {
-      // console.log('is game over?', gameOver?.())
       if (gameOver()) return
       if (context.matrix.length === 0) return
       const p = nextPosition()
@@ -51,7 +50,6 @@ export default () => {
       }
     })
 
-    createEffect(() => console.log('context.cursor is ', context.cursor?.[0]))
     const Player = () => (
       <>
         <Rectangle
@@ -116,7 +114,6 @@ export default () => {
           collision
           data={'circle'}
           onCollision={collisions => {
-            console.log('collisions', Array.from(collisions))
             if (collisions.size > 0) {
               if (collisions.has('lava')) {
                 setGameOver(true)

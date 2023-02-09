@@ -26,12 +26,7 @@ export default (props: Partial<RectangleProps & General>) => {
   )
   const context = useDisplay()
 
-  createEffect(() => console.log('color changed', merged.color, props.color))
-
-  onCleanup(() => console.log('cleaned up for some reason'))
-
   const drawRectangle = () => {
-    // console.log('props.color', props.color.r)
     if (merged.dimensions[0] === 0 && merged.dimensions[1] === 0) return
     let collisions = new Set<unknown>()
 
@@ -73,8 +68,6 @@ export default (props: Partial<RectangleProps & General>) => {
         if (current?.collision && merged.collision) {
           collisions.add(current.data)
         }
-
-        // console.log(`rgba(${rgba.r}, ${rgba.g}, ${rgba.b}, 1)`)
 
         context.setPixel?.(position, {
           color: `rgba(${rgba.r}, ${rgba.g}, ${rgba.b}, 1)`,

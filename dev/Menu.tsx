@@ -1,5 +1,5 @@
 import { useNavigate } from '@solidjs/router'
-import { createSignal } from 'solid-js'
+import { createSignal, For } from 'solid-js'
 import { useDisplay, useClock, Display, Rectangle, Text } from '../src'
 
 export default () => {
@@ -34,10 +34,15 @@ export default () => {
           width: SIZE + 'px',
         }}
       >
-        <Text text="1" onClick={() => navigate('/1')} />
-        <Text text="2" />
-        <Text text="3" />
-        <Text text="4" onClick={() => navigate('/4')} />
+        <For each={new Array(6).fill('')}>
+          {(_, index) => (
+            <Text
+              text={+index() + 1}
+              position={[index() * 8, 1]}
+              onClick={() => navigate('/' + (index() + 1))}
+            />
+          )}
+        </For>
 
         {/* <Rectangle dimensions={[10, 10]} color={'red'} /> */}
       </Display>
