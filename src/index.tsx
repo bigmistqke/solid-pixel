@@ -6,6 +6,7 @@ import Marquee from './components/Marquee'
 import Particle from './components/Particle'
 import Rectangle from './components/Rectangle'
 import Text from './components/Text'
+import Html from './components/Html'
 import WrappedText from './components/WrappedText'
 import { BlendMode } from './utils/color'
 import useClock from './utils/useClock'
@@ -20,7 +21,19 @@ export type General = {
   pointerEvents?: boolean
   collision?: boolean
   onCollision?: (collisions: Set<any>) => void
+  onFrame: () => void
   data: any
 }
 export type { BlendMode }
-export { Text, Rectangle, Marquee, Display, useDisplay, Circle, WrappedText, Particle, useClock }
+export {
+  Text,
+  Rectangle,
+  Marquee,
+  Display,
+  useDisplay,
+  Circle,
+  Html,
+  WrappedText,
+  Particle,
+  useClock,
+}

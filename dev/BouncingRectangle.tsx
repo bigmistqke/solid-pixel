@@ -1,8 +1,10 @@
 import { createSignal, mergeProps } from 'solid-js'
 import { RectangleProps } from 'src/components/Rectangle'
-import { BlendMode, Rectangle, useDisplay, Vector } from '../src'
+import { BlendMode, General, Rectangle, useDisplay, Vector } from '../src'
 
-export default (props: Partial<RectangleProps> & { dimensions?: Vector; position?: Vector }) => {
+export default (
+  props: Partial<RectangleProps> & Partial<General> & { dimensions?: Vector; position?: Vector },
+) => {
   const merged = mergeProps(
     {
       dimensions: [10, 10] as Vector,
@@ -42,6 +44,9 @@ export default (props: Partial<RectangleProps> & { dimensions?: Vector; position
       color={merged.color}
       blendMode={merged.blendMode}
       opacity={merged.opacity}
+      collision={merged.collision}
+      onCollision={merged.onCollision}
+      data={merged.data}
     />
   )
 }

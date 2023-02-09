@@ -86,6 +86,9 @@ export default (props: Partial<RectangleProps & General>) => {
     }
   }
 
-  context.onFrame?.(() => drawRectangle())
+  context.onFrame?.(() => {
+    drawRectangle()
+    props.onFrame?.()
+  })
   return <></>
 }

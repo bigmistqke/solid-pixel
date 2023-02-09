@@ -29,10 +29,12 @@ type DisplayContextType = {
   matrix: Matrix
   setPixel?: (position: Vector, props: { color: string } & Partial<General>) => void
   dimensions: Vector
+  pixelDimensions?: Vector
   clock: number
   cursor?: Vector
   inBounds?: (pos: Vector) => boolean
   onFrame?: (callback: (clock: number) => void) => void
+  nextFrame?: (callback: (clock: number) => void) => void
   onWheel?: (callback: (event: WheelEvent) => void) => void
 }
 
@@ -100,8 +102,10 @@ export const Display: Component<DisplayProps> = props => {
 
   // RENDER
   const RenderQueue = new Set<(clock: number) => void>()
+  const SingleQueue = new Set<(clock: number) => void>()
+
   const render = () => {
-    console.time('render')
+    // console.time('render')
     batch(() => {
       clearDisplay(position => {
         const color = matrix[position[0]]?.[position[1]]?.color
@@ -113,7 +117,9 @@ export const Display: Component<DisplayProps> = props => {
       if (props.postProcess) props.postProcess(matrix, setMatrix)
     })
 
-    console.timeEnd('render')
+    SingleQueue.forEach(callback => callback(props.clock))
+    SingleQueue.clear()
+    // console.timeEnd('render')
   }
 
   /* clearDisplay(position => {
@@ -134,7 +140,11 @@ export const Display: Component<DisplayProps> = props => {
     batch(() => WheelQueue.forEach(callback => callback(event)))
 
   const onMouseMove = (event: MouseEvent) => {
-    const { x, y } = (event.target as HTMLDivElement).dataset
+    const element = document
+      .elementsFromPoint(event.clientX, event.clientY)
+      .filter(el => 'x' in (el as HTMLElement).dataset)[0]
+    if (!element || !('dataset' in element)) return
+    const { x, y } = element.dataset
     if (!x || !y) return
     setCursor([+x, +y])
   }
@@ -148,7 +158,7 @@ export const Display: Component<DisplayProps> = props => {
   const hoveredPixel = createMemo<Pixel | undefined>(previous => {
     const pixel = matrix[cursor()[0]]?.[cursor()[1]]
     if (pixel?.onHover !== previous?.onHover) {
-      // if (previous?.onHover) previous?.onHover?.(false)
+      if (previous?.onHover) previous?.onHover?.(false)
       pixel?.onHover?.(true)
     }
     if (pixel?.onClick || pixel?.onHover) {
@@ -163,44 +173,61 @@ export const Display: Component<DisplayProps> = props => {
 
   const getDimensions = () => [matrix.length, matrix[0]?.length ?? 0] as Vector
 
-  const context = createMemo(
-    (): DisplayContextType => ({
-      get clock() {
-        return props.clock
-      },
-      matrix,
-      setPixel,
-      inBounds,
-      get cursor() {
-        return cursor()
-      },
-      onFrame: callback => {
-        RenderQueue.add(callback)
-        onCleanup(() => RenderQueue.delete(callback))
-      },
-      get dimensions() {
-        return getDimensions()
-      },
-      onWheel: callback => {
-        WheelQueue.add(callback)
-        onCleanup(() => WheelQueue.delete(callback))
-      },
-    }),
-  )
+  const [context, setContext] = createStore<DisplayContextType>({
+    get clock() {
+      return props.clock
+    },
+    matrix,
+    setPixel,
+    inBounds,
+    get cursor() {
+      return cursor()
+    },
+    onFrame: callback => {
+      RenderQueue.add(callback)
+      onCleanup(() => RenderQueue.delete(callback))
+    },
+    nextFrame: callback => {
+      SingleQueue.add(callback)
+      onCleanup(() => SingleQueue.delete(callback))
+    },
+    get dimensions() {
+      return getDimensions()
+    },
+    onWheel: callback => {
+      WheelQueue.add(callback)
+      onCleanup(() => WheelQueue.delete(callback))
+    },
+  })
 
   const onClick = () => {
     const h = hoveredPixel()
     if (!h || !props.onClick) return
-    props.onClick?.(h, context())
+    props.onClick?.(h, context)
   }
 
+  let pixel: HTMLDivElement
+
+  let timeout: NodeJS.Timeout
+
+  const updatePixelDimensions = () => {
+    if (timeout) clearTimeout(timeout)
+    timeout = setTimeout(() => {
+      const bounds = pixel.getBoundingClientRect()
+      console.log([bounds.width, bounds.height])
+      setContext('pixelDimensions', [bounds.width, bounds.height])
+    }, 100)
+  }
+
+  createEffect(updatePixelDimensions)
+  createEffect(on(() => [props.width, props.height], updatePixelDimensions))
+  window.addEventListener('mousemove', onMouseMove)
   return (
-    <DisplayContext.Provider value={context()}>
+    <DisplayContext.Provider value={context}>
       {props.children}
       <div
         onClick={onClick}
         onWheel={onWheel}
-        onMouseMove={onMouseMove}
         onMouseDown={onMouseDown}
         classList={{ [s.pointer]: cursorStyle() === 'pointer' }}
         style={{
@@ -217,6 +244,9 @@ export const Display: Component<DisplayProps> = props => {
             <Index each={row()}>
               {(color, y) => (
                 <div
+                  ref={p => {
+                    if (x === 0 && y === 0) pixel = p
+                  }}
                   style={{
                     flex: 1,
                     display: 'inline-block',
