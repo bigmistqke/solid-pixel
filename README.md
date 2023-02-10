@@ -72,6 +72,9 @@ https://user-images.githubusercontent.com/10504064/217322967-987a9c12-c7e5-485e-
 
 https://user-images.githubusercontent.com/10504064/217902636-dec116a7-6fe1-4f8c-ac77-de84b8278047.mp4
 
+- customize pixels with `pixel`-callback
+
+https://user-images.githubusercontent.com/10504064/218194861-285398ed-26f6-4119-8d1d-089eb4d256a0.mp4
 
 ## Components
 
@@ -85,6 +88,7 @@ https://user-images.githubusercontent.com/10504064/217902636-dec116a7-6fe1-4f8c-
     - children: `JSXElement`
     - clock: `number`
     - background: `string | (uv: [number, number], current: string) => string`
+    - pixel: `(pixel: Accessor<Pixel>) => JSX.Element`
     - pixelStyle: `JSX.CSSProperties`
     - onClick: `(pixel: Pixel, context: DisplayContextType) => void`
     - postProcess: `(matrix: Matrix, setMatrix: StoreSetterFunction<Matrix>) => void`
