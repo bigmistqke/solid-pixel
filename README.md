@@ -74,7 +74,7 @@ https://user-images.githubusercontent.com/10504064/217902636-dec116a7-6fe1-4f8c-
 
 - customize pixels with `pixel`-callback
 
-https://user-images.githubusercontent.com/10504064/218194861-285398ed-26f6-4119-8d1d-089eb4d256a0.mp4
+https://user-images.githubusercontent.com/10504064/218197132-7dc13b68-8b20-449f-be5e-7832bbdfceaf.mp4
 
 ## Components
 
