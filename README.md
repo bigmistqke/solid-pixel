@@ -8,6 +8,8 @@
 
 ■ A Solid Pixel Renderer ■
 
+> `Pixel Renderer`-experiment by manipulating a 2-dimensional array directly. No shaders are involved in the process; the calculation of the color-values is done in JS and are rendered by changing the background of `div`s in a css-grid. JS is not particularly suited for doing so many calculations each frame, so do not expect great performance. 
+
 ## Write JSX
 
 ```tsx
